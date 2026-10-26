@@ -131,7 +131,7 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
     res.render("inicio", {
-        titulo: "Reservas SALAS"
+        titulo: "Reserva de Salas de Estudio"
     })
 })
 
