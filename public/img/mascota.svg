@@ -1,0 +1,37 @@
+<svg
+  width="200"
+  height="200"
+  viewBox="0 0 200 200"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- Orejas -->
+  <ellipse cx="57" cy="78" rx="22" ry="38" fill="#9B623D"
+           transform="rotate(20 57 78)" />
+  <ellipse cx="143" cy="78" rx="22" ry="38" fill="#9B623D"
+           transform="rotate(-20 143 78)" />
+
+  <!-- Cabeza -->
+  <circle cx="100" cy="90" r="57" fill="#D9A06C" />
+
+  <!-- Hocico -->
+  <ellipse cx="100" cy="112" rx="31" ry="23" fill="#F6D8B4" />
+
+  <!-- Ojos -->
+  <circle cx="79" cy="85" r="5" fill="#292019" />
+  <circle cx="121" cy="85" r="5" fill="#292019" />
+
+  <!-- Nariz -->
+  <ellipse cx="100" cy="105" rx="9" ry="7" fill="#292019" />
+
+  <!-- Boca -->
+  <path d="M100 111 Q100 124 89 122 M100 111 Q100 124 111 122"
+        fill="none" stroke="#292019" stroke-width="3"
+        stroke-linecap="round" />
+
+  <!-- Cuerpo -->
+  <ellipse cx="100" cy="169" rx="42" ry="25" fill="#D9A06C" />
+
+  <!-- Patitas -->
+  <ellipse cx="76" cy="184" rx="13" ry="8" fill="#F6D8B4" />
+  <ellipse cx="124" cy="184" rx="13" ry="8" fill="#F6D8B4" />
+</svg>
