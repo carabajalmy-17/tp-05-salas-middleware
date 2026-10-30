@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "estudiante": "malena carabajal",
+        "email": "malena65@gmail.com",
+        "sala": "Sala Norte",
+        "fecha": "17-12-2026",
+        "turno": "Mañana",
+        "personas": 2
+    },
+    {
+        "id": 2,
+        "estudiante": "Florencia Rojas",
+        "email": "florencia23@gmail.com",
+        "sala": "Sala Sur",
+        "fecha": "20-12-2026",
+        "turno": "Tarde",
+        "personas": 6
+    },
+    {
+        "id": 3,
+        "estudiante": "Facundo Sanchez",
+        "email": "sanchez49@gmail.com",
+        "sala": "Sala Multimedia",
+        "fecha": "07-11-2026",
+        "turno": "Noche",
+        "personas": 4
+    },
+    {
+        "id": 4,
+        "estudiante": "Cristian Valle",
+        "email": "Crvalle75@gmail.com",
+        "sala": "Sala Norte",
+        "fecha": "25-11-2026",
+        "turno": "Mañana",
+        "personas": 4
+    }
+]

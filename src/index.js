@@ -1,58 +1,26 @@
 const express = require("express");
+const fs = require("node:fs/promises");
 const expressLayouts = require("express-ejs-layouts");
 const morgan = require("morgan");
 const { error } = require("node:console");
 const path = require("node:path");
 
+const { leerReservas } = require("./archivos");
+const ruta = path.join(__dirname, "..", "reservas", "reservas.json");
+
 const app = express();
 const PORT = 3000;
 
-const reservas = [
-    {
-        "id": 1,
-        "estudiante": "malena carabajal",
-        "email": "malena65@gmail.com",
-        "sala": "Sala Norte",
-        "fecha": "17-12-2026",
-        "turno": "Mañana",
-        "personas": 2
-    },
-    {
-        "id": 2,
-        "estudiante": "Florencia Rojas",
-        "email": "florencia23@gmail.com",
-        "sala": "Sala Sur",
-        "fecha": "20-12-2026",
-        "turno": "Tarde",
-        "personas": 6
-    },
-    {
-        "id": 3,
-        "estudiante": "Facundo Sanchez",
-        "email": "sanchez49@gmail.com",
-        "sala": "Sala Multimedia",
-        "fecha": "07-11-2026",
-        "turno": "Noche",
-        "personas": 4
-    },
-    {
-        "id": 4,
-        "estudiante": "Cristian Valle",
-        "email": "Crvalle75@gmail.com",
-        "sala": "Sala Norte",
-        "fecha": "25-11-2026",
-        "turno": "Mañana",
-        "personas": 4
-    }
-]
-
 let numeroDeSolicitud = 0;
 
+let reservas = [];
+
 function identificarSolicitud(req, res, next) {
+
     numeroDeSolicitud += 1;
     res.locals.solicitudId = `CAM-${String(numeroDeSolicitud)}`;
     console.log(
-        `identificar solicitud : [${res.locals.solicitudId}] ${req.method} ${req.orginalUrl}`
+        `identificar solicitud : [${res.locals.solicitudId}] ${req.method} ${req.originalUrl}`
     );
     next();
 }
@@ -61,7 +29,7 @@ function medirDuracion(req, res, next) {
     const inicio = process.hrtime.bigint();
     res.on("finish", () => {
         const duracion = Number(process.hrtime.bigint() - inicio) / 1_000_000;
-        console.log(`duracion: [${res.locals.solicitudId}] ${req.method} ${req.orginalUrl} ${res.statusCode} ${duracion.toFixed(2)} ms`);
+        console.log(`duracion: [${res.locals.solicitudId}] ${req.method} ${req.originalUrl} ${res.statusCode} ${duracion.toFixed(2)} ms`);
     });
 
     next();
@@ -115,66 +83,77 @@ function crearReserva(req, res) {
     res.redirect("/reservas");
 }
 
+async function main() {
+    reservas = await leerReservas(ruta);
+    app.set("view engine", "ejs");
+    app.set("views", path.join(__dirname, "..", "views"));
+    app.set("layout", "layouts/main");
 
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "..", "views"));
-app.set("layout", "layouts/main");
+    app.use(morgan("dev"));
+    app.use(identificarSolicitud);
+    app.use(medirDuracion);
+    app.use(expressLayouts);
+    app.use(express.static(path.join(__dirname, "..", "public")));
+    app.use(express.urlencoded({ extended: false }));
+    app.use(express.json());
 
-app.use(morgan("dev"));
-app.use(identificarSolicitud);
-app.use(medirDuracion);
-app.use(expressLayouts);
-app.use(express.static(path.join(__dirname, "..", "public")));
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-
-app.get("/", (req, res) => {
-    res.render("inicio", {
-        titulo: "Reserva de Salas de Estudio"
+    app.get("/api/reservas", (req,res)=> {
+        res.json(reservas);
     })
-})
 
-const reservasRouter = express.Router();
-
-reservasRouter.use(prepararAreaReservas);
-
-reservasRouter.get("/", (req, res) => {
-    res.render("reservas/lista", {
-        titulo: "reservas realizadas",
-        reservas
-    })
-});
-
-reservasRouter.get("/nueva", (req, res) => {
-    res.render("reservas/nueva", {
-        titulo: "Nueva Reserva",
-        error: null,
-        valores: {}
-    })
-})
-
-reservasRouter.get("/:id", (req, res) => {
-    const id = Number(req.params.id);
-    const reserva = reservas.find((elemento) => elemento.id === id);
-
-    if (!reserva){
-        return res.status(404).render("no-encontrado", {
-            titulo: "reserva no encontrada",
-            mensaje: "no se encontro reserva con ese identificador."
+    app.get("/", (req, res) => {
+        res.render("inicio", {
+            titulo: "Reserva de Salas de Estudio"
         })
-    }
-
-    res.render("reservas/detalle", {
-        titulo: reserva.estudiante,
-        reserva
     })
+
+    const reservasRouter = express.Router();
+
+    reservasRouter.use(prepararAreaReservas);
+
+    reservasRouter.get("/", (req, res) => {
+        res.render("reservas/lista", {
+            titulo: "reservas realizadas",
+            reservas
+        })
+    });
+
+    reservasRouter.get("/nueva", (req, res) => {
+        res.render("reservas/nueva", {
+            titulo: "Nueva Reserva",
+            error: null,
+            valores: {}
+        })
+    })
+
+    reservasRouter.get("/:id", (req, res) => {
+        const id = Number(req.params.id);
+        const reserva = reservas.find((elemento) => elemento.id === id);
+
+        if (!reserva) {
+            return res.status(404).render("no-encontrado", {
+                titulo: "reserva no encontrada",
+                mensaje: "no se encontro reserva con ese identificador."
+            })
+        }
+
+        res.render("reservas/detalle", {
+            titulo: reserva.estudiante,
+            reserva
+        })
+    })
+
+    reservasRouter.post("/", validarReserva, crearReserva);
+
+    app.use("/reservas", reservasRouter);
+
+    app.listen(PORT, () => {
+        console.log(`servidor funcionando en http://localhost:${PORT}`)
+    })
+
+}
+main().catch((error) => {
+    console.error("no se pudo inciar la aplicacion", error);
+    process.exitCode = -1;
 })
 
-reservasRouter.post("/", validarReserva, crearReserva);
-
-app.use("/reservas", reservasRouter);
-
-app.listen(PORT, () => {
-    console.log(`servidor funcionando en http://localhost:${PORT}`)
-})
